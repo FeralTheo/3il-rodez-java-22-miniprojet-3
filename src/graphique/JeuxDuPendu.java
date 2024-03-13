@@ -8,14 +8,21 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
 
+/**
+ * Cette classe représente l'interface graphique du jeu du Pendu.
+ */
 public class JeuxDuPendu extends JFrame implements KeyListener {
-    private LogiquePendu logiquePendu;
-    private JLabel motLabel;
-    private JLabel lettresSaisiesLabel;
-    private JLabel definitionLabel;
-    private JPanel penduPanel;
-    private int etatPendu = 0;
+    private LogiquePendu logiquePendu; // Objet de la logique métier du jeu du Pendu
+    private JLabel motLabel; // Label pour afficher le mot à deviner
+    private JLabel lettresSaisiesLabel; // Label pour afficher les lettres déjà saisies par l'utilisateur
+    private JLabel definitionLabel; // Label pour afficher la définition du mot à deviner
+    private JLabel tentativesRestantesLabel; // Label pour afficher le nombre de tentatives restantes
+    private JPanel penduPanel; // Panel pour dessiner le pendu
+    private int etatPendu = 0; // État du pendu
 
+    /**
+     * Constructeur de la classe JeuxDuPendu.
+     */
     public JeuxDuPendu() {
         super("Jeu du Pendu");
         try {
@@ -47,12 +54,12 @@ public class JeuxDuPendu extends JFrame implements KeyListener {
         };
         add(penduPanel, BorderLayout.CENTER);
 
-        // Créer un conteneur pour les labels lettresSaisiesLabel et definitionLabel
-        JPanel labelsPanel = new JPanel(new GridLayout(2, 1));
+        // Créer un conteneur pour les labels lettresSaisiesLabel, definitionLabel et tentativesRestantesLabel
+        JPanel labelsPanel = new JPanel(new GridLayout(3, 1));
         // Ajouter les labels au conteneur
         labelsPanel.add(lettresSaisiesLabel = new JLabel("Lettres saisies : ", SwingConstants.CENTER));
         labelsPanel.add(definitionLabel); // Ajouter le label de la définition au conteneur
-
+        labelsPanel.add(tentativesRestantesLabel = new JLabel("Tentatives restantes : " + (11 - etatPendu), SwingConstants.CENTER)); // Ajouter le label pour afficher les tentatives restantes
         // Ajouter le conteneur à la partie sud de la fenêtre
         add(labelsPanel, BorderLayout.SOUTH);
 
@@ -60,7 +67,11 @@ public class JeuxDuPendu extends JFrame implements KeyListener {
         setFocusable(true);
     }
 
-
+    /**
+     * Dessine le pendu en fonction de l'état actuel.
+     *
+     * @param g L'objet Graphics utilisé pour dessiner.
+     */
     private void dessinerPendu(Graphics g) {
         Graphics2D g2d = (Graphics2D) g;
         int width = penduPanel.getWidth();
@@ -84,7 +95,7 @@ public class JeuxDuPendu extends JFrame implements KeyListener {
         if (etatPendu >= 5) {
             g2d.drawLine(width / 2, height / 4, width / 2, height / 4 + 10);
         }
-        // Dessiner le pendu en fonction du nombre d'étapes
+        // Dessiner le pendu
         if (etatPendu >= 6) {
             g2d.drawOval(width / 2 - 20, height / 4 + 10, 40, 40); // Tête
         }
@@ -105,6 +116,11 @@ public class JeuxDuPendu extends JFrame implements KeyListener {
         }
     }
 
+    /**
+     * Gère l'événement de saisie de touche.
+     *
+     * @param e L'événement de saisie de touche.
+     */
     @Override
     public void keyTyped(KeyEvent e) {
         char lettre = e.getKeyChar();
@@ -121,14 +137,17 @@ public class JeuxDuPendu extends JFrame implements KeyListener {
 
             etatPendu++;
             penduPanel.repaint();
-            
-            if (etatPendu >= 11) { 
+
+            if (etatPendu >= 11) {
                 JOptionPane.showMessageDialog(this, "Vous avez perdu la partie !");
                 restartGame();
             }
         }
     }
 
+    /**
+     * Réinitialise le jeu après la fin de la partie.
+     */
     private void restartGame() {
         // Effacer les informations précédentes
         etatPendu = 0;
@@ -142,13 +161,27 @@ public class JeuxDuPendu extends JFrame implements KeyListener {
         penduPanel.repaint();
     }
 
-
+    /**
+     * Gère l'événement de pression d'une touche.
+     *
+     * @param e L'événement de pression d'une touche.
+     */
     @Override
     public void keyPressed(KeyEvent e) {}
 
+    /**
+     * Gère l'événement de relâchement d'une touche.
+     *
+     * @param e L'événement de relâchement d'une touche.
+     */
     @Override
     public void keyReleased(KeyEvent e) {}
 
+    /**
+     * Point d'entrée du programme.
+     *
+     * @param args Les arguments de la ligne de commande.
+     */
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
             JeuxDuPendu penduGame = new JeuxDuPendu();
