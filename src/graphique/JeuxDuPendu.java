@@ -143,6 +143,7 @@ public class JeuxDuPendu extends JFrame implements KeyListener {
             lettresSaisiesLabel.setText(lettresSaisies);
 
             etatPendu++;
+            tentativesRestantesLabel.setText("Tentatives restantes : " + (11 - etatPendu));
             penduPanel.repaint();
 
             if (etatPendu >= 11) {
