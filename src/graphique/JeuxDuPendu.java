@@ -1,27 +1,40 @@
 package graphique;
 
+import logique.GestionMots;
 import logique.LogiquePendu;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.IOException;
 
 public class JeuxDuPendu extends JFrame implements KeyListener {
-    private LogiquePendu LogiquePendu;
+    private LogiquePendu logiquePendu;
     private JLabel motLabel;
     private JLabel lettresSaisiesLabel;
+    private JLabel definitionLabel;
     private JPanel penduPanel;
     private int etatPendu = 0;
 
-    public JeuxDuPendu(String motSecret) {
-        this.LogiquePendu = new LogiquePendu(motSecret);
+    public JeuxDuPendu() {
+        super("Jeu du Pendu");
+        try {
+            GestionMots gestionMots = new GestionMots();
+            String[] motAleatoire = gestionMots.tirerMotAleatoire();
+            logiquePendu = new LogiquePendu(motAleatoire[0]);
+            // Assigner la définition au label
+            definitionLabel = new JLabel("Définition : " + motAleatoire[1], SwingConstants.CENTER);
+        } catch (IOException e) {
+            System.err.println("Erreur lors de la récupération des mots aléatoires : " + e.getMessage());
+            e.printStackTrace();
+        }
 
         setTitle("Jeu du Pendu");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(400, 400);
         setLayout(new BorderLayout());
 
-        motLabel = new JLabel(LogiquePendu.getMotAffiche(), SwingConstants.CENTER);
+        motLabel = new JLabel(logiquePendu.getMotAffiche(), SwingConstants.CENTER);
         motLabel.setFont(new Font("Arial", Font.BOLD, 20));
         add(motLabel, BorderLayout.NORTH);
 
@@ -34,12 +47,19 @@ public class JeuxDuPendu extends JFrame implements KeyListener {
         };
         add(penduPanel, BorderLayout.CENTER);
 
-        lettresSaisiesLabel = new JLabel("Lettres saisies : ", SwingConstants.CENTER);
-        add(lettresSaisiesLabel, BorderLayout.SOUTH);
+        // Créer un conteneur pour les labels lettresSaisiesLabel et definitionLabel
+        JPanel labelsPanel = new JPanel(new GridLayout(2, 1));
+        // Ajouter les labels au conteneur
+        labelsPanel.add(lettresSaisiesLabel = new JLabel("Lettres saisies : ", SwingConstants.CENTER));
+        labelsPanel.add(definitionLabel); // Ajouter le label de la définition au conteneur
+
+        // Ajouter le conteneur à la partie sud de la fenêtre
+        add(labelsPanel, BorderLayout.SOUTH);
 
         addKeyListener(this);
         setFocusable(true);
     }
+
 
     private void dessinerPendu(Graphics g) {
         Graphics2D g2d = (Graphics2D) g;
@@ -88,25 +108,40 @@ public class JeuxDuPendu extends JFrame implements KeyListener {
     @Override
     public void keyTyped(KeyEvent e) {
         char lettre = e.getKeyChar();
-        if (LogiquePendu.guessLetter(lettre)) {
-            motLabel.setText(LogiquePendu.getMotAffiche());
-            if (LogiquePendu.isGameWin()) {
+        if (logiquePendu.guessLetter(lettre)) {
+            motLabel.setText(logiquePendu.getMotAffiche());
+            if (logiquePendu.isGameWin()) {
                 JOptionPane.showMessageDialog(this, "Félicitations ! Vous avez deviné le mot !");
-                System.exit(0);
+                restartGame();
             }
         } else {
             String lettresSaisies = lettresSaisiesLabel.getText();
             lettresSaisies += lettre + " ";
             lettresSaisiesLabel.setText(lettresSaisies);
 
-            if (etatPendu < 10) {
-                etatPendu++;
-                penduPanel.repaint();
-            } else {
+            etatPendu++;
+            penduPanel.repaint();
+            
+            if (etatPendu >= 11) { 
                 JOptionPane.showMessageDialog(this, "Vous avez perdu la partie !");
+                restartGame();
             }
         }
     }
+
+    private void restartGame() {
+        // Effacer les informations précédentes
+        etatPendu = 0;
+        lettresSaisiesLabel.setText("Lettres saisies : ");
+        logiquePendu.reset(); // Réinitialiser le jeu
+
+        // Mettre à jour l'affichage du mot
+        motLabel.setText(logiquePendu.getMotAffiche()); // Mettre à jour le texte du label avec le nouveau mot
+
+        // Redessiner le pendu
+        penduPanel.repaint();
+    }
+
 
     @Override
     public void keyPressed(KeyEvent e) {}
@@ -116,7 +151,7 @@ public class JeuxDuPendu extends JFrame implements KeyListener {
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            JeuxDuPendu penduGame = new JeuxDuPendu("Hello");
+            JeuxDuPendu penduGame = new JeuxDuPendu();
             penduGame.setVisible(true);
         });
     }
