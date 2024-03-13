@@ -124,6 +124,13 @@ public class JeuxDuPendu extends JFrame implements KeyListener {
     @Override
     public void keyTyped(KeyEvent e) {
         char lettre = e.getKeyChar();
+        
+        // Vérifier si la touche pressée est une lettre, un espace ou un tiret
+        if (!Character.isLetter(lettre) && lettre != ' ' && lettre != '-') {
+            e.consume(); // Ignorer la touche pressée si elle n'est pas une lettre, un espace ou un tiret
+            return;
+        }
+        
         if (logiquePendu.guessLetter(lettre)) {
             motLabel.setText(logiquePendu.getMotAffiche());
             if (logiquePendu.isGameWin()) {
